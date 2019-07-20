@@ -1,26 +1,43 @@
 import React from 'react';
-import {Admin, Resource, EditGuesser}  from 'react-admin';
-import jsonServerProvider from 'ra-data-json-server';
-import PostIcon from '@material-ui/icons/Book';
+import { Admin, Resource, ListGuesser, EditGuesser } from 'react-admin';
+import crudProvider from '@fusionworks/ra-data-nest-crud'
 import UserIcon from '@material-ui/icons/Group';
 
-
-
-import {UserList}  from './users';
-import {PostList, PostEdit,PostCreate }  from './posts';
 import Dashboard from './Dashboard';
 import authProvider from './authProvider';
+import { GET_LIST } from 'ra-core';
 
-const dataProvider =jsonServerProvider('http://jsonplaceholder.typicode.com');
+import customeRoutes  from './customRoutes';
+import Menu from './Menu';
 
-function App() {
-  return (
-   <Admin dataProvider={dataProvider}  authProvider={authProvider}  dashboard={Dashboard}>
-     <Resource name="posts" list={PostList} edit={PostEdit}  create={PostCreate } icon={PostIcon}/>
-     <Resource name="users" list={UserList} icon={UserIcon}/>
-   </Admin>
-     
-  );
+const dataProvider = crudProvider('http://localhost:5000');
+
+
+class App extends React.Component {
+
+  render() {
+    return (
+      <Admin Menu={Menu} customeRoutes={customeRoutes} dataProvider={dataProvider}
+             authProvider={authProvider} dashboard={Dashboard}>
+        <Resource name="products" list={ListGuesser} edit={EditGuesser} icon={UserIcon} />
+      </Admin>
+
+    )
+
+  }
+
+  componentDidMount() {
+    dataProvider(GET_LIST, 'products', {
+      pagination: { page: 1, perPage: 10 },
+      sort: { field: 'name', order: 'ASC' },
+      filter: { id: 1 },
+    })
+      .then(response => console.log(response));
+
+      dataProvider('GET_ONE','products',{id: 15})
+      .then(response => console.log(response));
+  }
+
 }
 
 export default App;
